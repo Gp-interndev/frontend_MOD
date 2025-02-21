@@ -114,7 +114,7 @@ const FileUpload = () => {
     setIsLoading(true);
     try {
       const response = await fetch(
-        `http://127.0.0.1:5000/get_user/${outwardNumber}`,
+        `https://mod.dpzoning.com/api/get_user/${outwardNumber}`,  //http://127.0.0.1:5000/get_user/${outwardNumber}
         {
           method: "GET",
           headers: {

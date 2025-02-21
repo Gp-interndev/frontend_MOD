@@ -8,7 +8,7 @@ import PleaseWait from './components/PleaseWait';
 import ThankuPage from './components/ThankuPage';
 import SurveyForm from './components/SurveyForm';
 import LandingPage from './components/LandingPage';
-import Document from './components/Document';
+import PDFViewer from './components/PDFViewer';
 
 function App() {
   return (
@@ -23,7 +23,7 @@ function App() {
         <Route path="/ThankuPage" element={<ThankuPage/>}/>
         <Route path="/SurveyForm" element={<SurveyForm/>}/>
         <Route path="/LandingPage" element={<LandingPage/>}/>
-        <Route path="/Document" element={<Document/>}/>
+        <Route path="/pdf-viewer" element={<PDFViewer/>}/> 
 
       </Routes>
     </Router>

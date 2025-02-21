@@ -124,8 +124,8 @@ const SurveyForm = () => {
     }
 
     try {
-      const response = await fetch("http://127.0.0.1:5000/save_user", {
-        method: "POST",
+      const response = await fetch("https://mod.dpzoning.com/api/save_user", {   //http://127.0.0.1:5000/save_user
+        method: "POST", 
         headers: {
           "Content-Type": "application/json",
         },
@@ -508,7 +508,7 @@ const SurveyForm = () => {
                 </button>
 
                 {/* Submit Button */}
-                <button
+                <button 
                   type="submit"
                   className="px-6 py-2 text-sm bg-blue-600 text-white rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-300 focus:ring-offset-2 transition-colors duration-200"
                 >
@@ -540,7 +540,7 @@ const SurveyForm = () => {
                   <div className="mt-4 text-right">
                     <button
                       onClick={() => {
-                        setPopupMessage(null); // Close the popup
+                        setPopupMessage(null); 
                       }}
                       className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-300 transition-colors duration-200"
                     >

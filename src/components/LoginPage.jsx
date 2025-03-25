@@ -1,8 +1,8 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { User, Lock, Eye, EyeOff, X } from "lucide-react";
-import { toast, ToastContainer } from 'react-toastify';
-import 'react-toastify/dist/ReactToastify.css';
+import { toast, ToastContainer } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 import Header from "./Header";
 import Footer from "./Footer";
 
@@ -10,22 +10,25 @@ const LoginPage = () => {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
+  const [loading, setLoading] = useState(false); // Track loading state
   const navigate = useNavigate(); // Initialize the navigate hook
 
   // Form submission handler
   const handleSubmit = async (e) => {
     e.preventDefault();
-  
+
     if (username && password) {
+      setLoading(true); // Set loading to true when the login button is clicked
       try {
-        const response = await fetch("https://mod.dpzoning.com/api/admin_login", {   // http://localhost:5000/admin_login
+        const response = await fetch("http://localhost:5000/admin_login", {
+          // http://localhost:5000/admin_login
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ username, password }),
         });
-  
+
         const data = await response.json();
-  
+
         if (response.ok) {
           toast.success("Login successful!"); // Success toast
           navigate("/LandingPage"); // Navigate to the dashboard
@@ -34,10 +37,11 @@ const LoginPage = () => {
         }
       } catch (error) {
         toast.error("Server error. Please try again later."); // Error toast
+      } finally {
+        setLoading(false); // Set loading back to false after the login process finishes
       }
     }
   };
-  
 
   return (
     <div className="min-h-screen bg-gray-50 flex flex-col">
@@ -49,8 +53,8 @@ const LoginPage = () => {
           <h2 className="text-3xl font-bold text-blue-600 mb-2">
             Welcome Back!
           </h2>
-          <p className="text-gray-600" style={{fontSize:"15.1px"}}>
-           log in to securaly access and manage your land deposit documents.
+          <p className="text-gray-600" style={{ fontSize: "15.1px" }}>
+            Log in to securely access and manage your land deposit documents.
           </p>
           <hr className="border-t border-gray-300 mt-4" />
         </div>
@@ -134,9 +138,13 @@ const LoginPage = () => {
             <button
               type="submit"
               className="w-full bg-blue-300 hover:bg-blue-600 text-white py-2 rounded-md transition-colors"
-              disabled={!username || !password} // Disable button if any field is missing
+              disabled={!username || !password || loading} // Disable button when loading or fields are missing
             >
-              LOGIN
+              {loading ? (
+                <div className="w-5 h-5 border-4 border-t-4 border-white border-solid rounded-full mx-auto spinner"></div>
+              ) : (
+                "LOGIN"
+              )}
             </button>
 
             <div className="text-center">

@@ -19,7 +19,7 @@ const NextStep = () => {
       formData.append('file', location.state.file);
 
       try {
-        const response = await fetch("https://mod.dpzoning.com/api/process_csv", {  //http://localhost:5000/process_csv
+        const response = await fetch("http://localhost:5000/process_csv", { 
           method: 'POST',
           body: formData,
         });

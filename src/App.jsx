@@ -4,11 +4,11 @@ import LoginPage from './components/LoginPage';
 import FileUpload from './components/FileUpload';
 import DataTable from './components/DataTable';
 import NextStep from './components/NextStep';
-import PleaseWait from './components/PleaseWait';
-import ThankuPage from './components/ThankuPage';
 import SurveyForm from './components/SurveyForm';
 import LandingPage from './components/LandingPage';
 import PDFViewer from './components/PDFViewer';
+
+
 
 function App() {
   return (
@@ -19,12 +19,9 @@ function App() {
         <Route path="/FileUpload" element={<FileUpload />} />
         <Route path="/DataTable" element={<DataTable />} />
         <Route path="/next-step" element={<NextStep />} />
-        <Route path="/pleasewait" element={<PleaseWait/>}/>
-        <Route path="/ThankuPage" element={<ThankuPage/>}/>
         <Route path="/SurveyForm" element={<SurveyForm/>}/>
         <Route path="/LandingPage" element={<LandingPage/>}/>
         <Route path="/pdf-viewer" element={<PDFViewer/>}/> 
-
       </Routes>
     </Router>
   );

@@ -1,11 +1,15 @@
-import { defineConfig } from 'vite'
-import react from '@vitejs/plugin-react'
+import { defineConfig } from 'vite';
+import react from '@vitejs/plugin-react';
 
-// https://vite.dev/config/
 export default defineConfig({
   plugins: [react()],
   server: {
+    host: '0.0.0.0', // Listen on all network interfaces
+    port: 5173, // Set your preferred port here
     historyApiFallback: true, // Ensures React Router works when directly accessing routes
+    proxy: {
+      '/api': 'http://127.0.0.1:5000', // Proxy requests to backend API
+    },
   },
-  base: '/', // Ensure the base path is set correctly, or adjust if your app is deployed under a sub-path
-})
+  base: '/', // Ensure the base path is set correctly
+});

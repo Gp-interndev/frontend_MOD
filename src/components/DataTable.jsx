@@ -667,20 +667,3 @@ const DataTable = ({ data, outwardNumber }) => {
 
 export default DataTable;
 
-{
-  /* <iframe
-              src="http://localhost:5000/static/map.html"
-              style={mapStyle}
-              title="Map 1"
-              className="w-full"
-            ></iframe> */
-}
-{
-  /* <h5 className="map"style={{ color: "#888", fontSize: "12px"}}>MAP 2</h5>
-            <iframe
-              src="http://localhost:5000/static/map2.html"
-              style={mapStyle}
-              title="Map 2"
-              className="w-full"
-            ></iframe> */
-}

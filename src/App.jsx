@@ -7,6 +7,7 @@ import NextStep from './components/NextStep';
 import SurveyForm from './components/SurveyForm';
 import LandingPage from './components/LandingPage';
 import PDFViewer from './components/PDFViewer';
+import MapViewer from './components/MapViewer';
 
 
 
@@ -22,6 +23,7 @@ function App() {
         <Route path="/SurveyForm" element={<SurveyForm/>}/>
         <Route path="/LandingPage" element={<LandingPage/>}/>
         <Route path="/pdf-viewer" element={<PDFViewer/>}/> 
+        <Route path="/map-viewer" element={<MapViewer/>}/> 
       </Routes>
     </Router>
   );

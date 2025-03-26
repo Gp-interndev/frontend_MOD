@@ -10,33 +10,7 @@ const DataTable = ({ data, outwardNumber }) => {
   const cqlFilterWard3 = "	PALETTE_INDEX = '253.0'";
   const cqlFiltertopo = "PALETTE_INDEX = '253.0'";
 
-  // const [cqlFilterZone, setCqlFilterZone] = useState('');
-  // const [cqlFilterWard, setCqlFilterWard] = useState('');
 
-  // const applyZoneFilter = () => {
-  //   setCqlFilterZone(cqlFilterZone ? '' : "zone = 'D.M.C. Zone 5'");
-  // };
-
-  // const applyWardFilter = () => {
-  //   setCqlFilterWard(cqlFilterWard ? '' : "ward_name = 'Ward 10'");
-  // };
-
-  // return (
-  //   <div>
-  //     <MapComponent cqlFilterZone={cqlFilterZone} cqlFilterWard={cqlFilterWard} />
-
-  //     {/* Buttons to Apply Filters */}
-  //     <div style={{ position: 'absolute', bottom: '10px', left: '10px', zIndex: 1000, background: 'white', padding: '10px', borderRadius: '5px' }}>
-  //       <button onClick={applyZoneFilter}>
-  //         {cqlFilterZone ? 'Remove Zone Filter' : 'Apply Zone Filter'}
-  //       </button>
-  //       <br /><br />
-  //       <button onClick={applyWardFilter}>
-  //         {cqlFilterWard ? 'Remove Ward Filter' : 'Apply Ward Filter'}
-  //       </button>
-  //     </div>
-  //   </div>
-  // );
 
   const [activeMap, setActiveMap] = useState("map1");
 
@@ -83,29 +57,7 @@ const DataTable = ({ data, outwardNumber }) => {
     [outwardNumber]
   );
 
-  // useEffect(() => {
-  //   const fetchAviationData = async () => {
-  //     if (outwardNumber) {
-  //       try {
-  //         const response = await fetch(
-  //           `http://localhost:5000/get_aviation_data/${outwardNumber}`
-  //         );
-  //         if (response.ok) {
-  //           const data = await response.json();
-  //           console.log("Aviation Data Fetched:", data);
-  //           setAviationData(data); // Set the updated aviation data in the state
-  //         } else {
-  //           console.log("Error fetching aviation data:", await response.json());
-  //           setAviationData(null);
-  //         }
-  //       } catch (error) {
-  //         console.error("Error fetching aviation data:", error);
-  //       }
-  //     }
-  //   };
 
-  //   fetchAviationData();
-  // }, [outwardNumber]);
 
   useEffect(() => {
     const fetchAviationData = async () => {
@@ -198,74 +150,6 @@ const DataTable = ({ data, outwardNumber }) => {
     }
   };
 
-  // const handleSubmit = async () => {
-  //   // new handlesubmit for saving data to database also
-  //   try {
-  //     setIsGenerating(true);
-
-  //     // Get the file from the NextStep component through location state
-  //     // We need to access one level up since NextStep is the parent component
-  //     const file =
-  //       window.history.state?.usr?.file || window.history.state?.state?.file;
-
-  //     if (!file) {
-  //       throw new Error("File not available. Please upload again.");
-  //     }
-
-  //     // First, update the CSV data in the database
-  //     const formData = new FormData();
-  //     formData.append("file", file);
-  //     formData.append("outwardNumber", outwardNumber);
-
-  //     console.log("Updating CSV data with outward number:", outwardNumber);
-
-  //     // Send the data to the backend to update the database
-  //     const updateResponse = await fetch("http://localhost:5000/update_csv", {
-  //       method: "POST",
-  //       body: formData,
-  //     });
-
-  //     const updateResult = await updateResponse.json();
-
-  //     if (!updateResponse.ok) {
-  //       throw new Error(updateResult.error || "Failed to update CSV data");
-  //     }
-
-  //     console.log("CSV data updated successfully:", updateResult.message);
-
-  //     // Then proceed with document generation
-  //     const generateResponse = await fetch(
-  //       "http://localhost:5000/generate_doc",
-  //       {
-  //         method: "POST",
-  //         headers: {
-  //           "Content-Type": "application/json",
-  //         },
-  //         body: JSON.stringify({
-  //           outwardNumber,
-  //           fileData: data,
-  //         }),
-  //       }
-  //     );
-
-  //     const result = await generateResponse.json();
-
-  //     if (!generateResponse.ok) {
-  //       throw new Error(result.error || "Failed to generate document");
-  //     }
-
-  //     if (result.success) {
-  //       navigate("/pdf-viewer", { state: { outwardNumber, data } });
-  //     } else {
-  //       throw new Error(result.error || "Failed to generate document");
-  //     }
-  //   } catch (error) {
-  //     console.error("Operation Error:", error);
-  //     alert("Error: " + error.message);
-  //   } finally {
-  //     setIsGenerating(false);
-  //   }
-  // };
 
   const handleBackClick = () => {
     navigate(-1);
@@ -333,18 +217,7 @@ const DataTable = ({ data, outwardNumber }) => {
     fontSize: "10px",
   };
 
-  // const mapStyle = {
-  //   border: "1px solid #ccc",
-  //   borderRadius: "5px",
-  //   boxShadow: "0 4px 8px rgba(0, 0, 0, 0.1)",
-  //   position: "relative",
-  //   left: "90px",
-  //   width: "80%",
-  //   height: "70vh",
-  //   top: "-65px",
-  //   marginBottom:"5px"
-  // };
-
+  
   const mapStyle = {
     border: "1px solid #ccc",
     borderRadius: "5px",
@@ -417,13 +290,6 @@ const DataTable = ({ data, outwardNumber }) => {
     color: "white", // Ensures the icon is white
   };
 
-  const SkeletonLoader = () => (
-    <div className="animate-pulse space-y-4">
-      <div className="h-4 bg-gray-200 rounded w-3/4"></div>
-      <div className="h-4 bg-gray-200 rounded w-1/2"></div>
-      <div className="h-4 bg-gray-200 rounded w-2/3"></div>
-    </div>
-  );
 
   return (
     <div className="flex flex-col min-h-screen">
@@ -432,13 +298,7 @@ const DataTable = ({ data, outwardNumber }) => {
         className="content"
         style={{ position: "relative", left: "40px", top: "20px" }}
       >
-        {/* <h2 className="text-lg font-semibold">Review Land Information</h2>
-        <p className="para" style={{ width: "600px", fontSize: "12.3px" }}>
-          Please review the land details extracted from your uploaded file. The
-          information is displayed on the left, while the land layout is shown
-          on the map to the right. Once you're satisfied, the data will be saved
-          to the database.
-        </p> */}
+      
         {/* <hr className="w-1/2 border bg-blue-200 border-blue-200 mb-2 mt-2" /> */}
         <h3 className="mb-1" style={{ fontWeight: "bold", marginTop: "-10px" }}>
           1. Important Information
@@ -582,7 +442,7 @@ const DataTable = ({ data, outwardNumber }) => {
             </div>
 
             {/* Render the active map based on state */}
-            <div className="h-[calc(100%-60px)] overflow-hidden">
+            <div className="h-[calc(100%-60px)]">
               {activeMap === "map1" && (
                 <MapComponent
                   cqlFilterZone={cqlFilterZone}
@@ -623,12 +483,7 @@ const DataTable = ({ data, outwardNumber }) => {
             </div>
           </div>
 
-          {/* <div style={noteStyle}>
-            <span style={{ color: "#000000" }}>NOTE:</span> If some information
-            appears to be incorrect. For the best accuracy and output, please
-            review your Excel file, make the necessary corrections, and upload
-            it again.
-          </div> */}
+         
           <div style={buttonContainerStyle}>
             <button style={backbuttonStyle} onClick={handleBackClick}>
               <i

@@ -10,7 +10,7 @@ const SurveyForm = () => {
     nameOnCertificate: "",
     gstNumber: "",
     panNumber: "",
-    // siteAddress: "",
+    siteAddress: "",
     gutNumber: "",
     district: "",
     taluka: "",
@@ -25,36 +25,11 @@ const SurveyForm = () => {
   const [popupType, setPopupType] = useState(null); // success or error
 
   const validateField = (name, value) => {
-    switch (name) {
-      case "mobileNumber":
-        return /^[0-9]{10}$/.test(value)
-          ? ""
-          : "Please enter a valid 10-digit mobile number";
-      case "pincode":
-        return /^[0-9]{6}$/.test(value)
-          ? ""
-          : "Please enter a valid 6-digit pincode";
-      // case "panNumber":
-      //   return /^[A-Z]{5}[0-9]{4}[A-Z]{1}$/.test(value)
-      //     ? ""
-      //     : "Please enter a valid PAN number (if applicable)";
-      // case "gstNumber":
-      //   if (!value) return ""; // Optional field
-      //   return /^[0-9]{2}[A-Z]{5}[0-9]{4}[A-Z]{1}[1-9A-Z]{1}Z[0-9A-Z]{1}$/.test(
-      //     value
-      //   )
-      //     ? ""
-      //     : "Please enter a valid GST number (if applicable)";
-      case "name":
-      case "nameOnCertificate":
-        return /^[A-Za-z\s]+$/.test(value)
-          ? ""
-          : "Please enter valid name (letters only)";
-      default:
-        return value.trim()
-          ? ""
-          : `${name.charAt(0).toUpperCase() + name.slice(1)} is required`;
+    // Simply check if required fields have values
+    if (!value.trim()) {
+      return `${name.charAt(0).toUpperCase() + name.slice(1)} is required`;
     }
+    return "";
   };
 
   const handleChange = (e) => {
@@ -72,8 +47,11 @@ const SurveyForm = () => {
       }));
     }
 
-    // Skip validation for empty gstNumber or panNumber fields
-    if ((name === "gstNumber" || name === "panNumber") && !value) {
+    // Skip validation for empty optional fields
+    if (
+      (name === "gstNumber" || name === "panNumber" || name === "gutNumber") &&
+      !value
+    ) {
       return;
     }
 
@@ -92,8 +70,11 @@ const SurveyForm = () => {
 
     // Iterate over each key in formData
     Object.keys(formData).forEach((key) => {
-      // Skip validation for empty gstNumber and panNumber fields
-      if ((key === "gstNumber" || key === "panNumber") && !formData[key]) {
+      // Skip validation for empty optional fields
+      if (
+        (key === "gstNumber" || key === "panNumber" || key === "gutNumber") &&
+        !formData[key]
+      ) {
         return;
       }
 
@@ -125,7 +106,6 @@ const SurveyForm = () => {
 
     try {
       const response = await fetch("http://127.0.0.1:5000/save_user", {
-        //http://127.0.0.1:5000/save_user
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -136,7 +116,7 @@ const SurveyForm = () => {
           nameoncertificate: formData.nameOnCertificate,
           gstnumber: formData.gstNumber,
           pannumber: formData.panNumber,
-          // siteadress: formData.siteAddress,
+          siteaddress: formData.siteAddress,
           gutnumber: formData.gutNumber,
           district: formData.district,
           taluka: formData.taluka,
@@ -158,7 +138,7 @@ const SurveyForm = () => {
           nameOnCertificate: "",
           gstNumber: "",
           panNumber: "",
-          // siteAddress: "",
+          siteAddress: "",
           gutNumber: "",
           district: "",
           taluka: "",
@@ -179,105 +159,72 @@ const SurveyForm = () => {
   };
 
   return (
-    <div className="container mx-auto px-4 py-6">
-      <div className="max-w-4xl mx-auto bg-white rounded-lg shadow-lg" style={{height:"95vh"}}>
-        <div className="p-6">
-          <h2 className="text-2xl font-bold text-center mb-6">
-            Survey Information Form
+    <div className="container mx-auto px-4 py-4">
+      <div
+        className="max-w-4xl mx-auto rounded-lg shadow-lg px-2"
+        style={{ height: "96vh", backgroundColor: "#f9f9f9" }}
+      >
+        <div className="p-1">
+          <h2 className="text-2xl font-bold text-center mb-2 text-gray-800">
+            SURVEY INFORMATION FORM
           </h2>
+          <hr className="border-t border-blue-200 mb-4 w-1/2 mx-auto" />
 
-          <div className="scrollable-form"> 
+          <p
+            className="text-center text-sm text-gray-600 mb-6 leading-relaxed mx-auto"
+            style={{ maxWidth: "700px" }}
+          >
+            Fill in the required details to submit a new property survey
+            request. Ensure all information is accurate to avoid processing
+            delays. Once submitted, your application will be recorded and
+            reviewed by Monarch officials.
+          </p>
+
+          <div className="form">
             <form onSubmit={handleSubmit} className="space-y-8">
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-4">
                 {/* Personal Information Section */}
                 <div className="space-y-4">
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-1">
-                      Name
+                      Full Name
                     </label>
                     <input
                       type="text"
                       name="name"
                       value={formData.name}
                       onChange={handleChange}
-                      className={`w-full px-3 py-2 text-sm border rounded-lg focus:outline-none focus:ring-1 ${
-                        errors.name
-                          ? "border-red-500 focus:ring-red-200"
-                          : "border-gray-300 focus:ring-blue-200"
-                      }`}
+                      className="w-full px-4 py-2 text-sm rounded-lg bg-gray-100 border border-blue-300 shadow-[4px_4px_10px_rgba(0,0,0,0.1),-4px_-4px_10px_rgba(255,255,255,0.6)] focus:outline-none"
                       placeholder="Enter your name"
                     />
-                    {errors.name && (
-                      <p className="text-xs text-red-500 mt-1">{errors.name}</p>
-                    )}
                   </div>
 
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-1">
-                      Name on Certificate
+                      Name on Certificate (This name will be printed on the certificate)
                     </label>
                     <input
                       type="text"
                       name="nameOnCertificate"
                       value={formData.nameOnCertificate}
                       onChange={handleChange}
-                      className={`w-full px-3 py-2 text-sm border rounded-lg focus:outline-none focus:ring-1 ${
-                        errors.nameOnCertificate
-                          ? "border-red-500 focus:ring-red-200"
-                          : "border-gray-300 focus:ring-blue-200"
-                      }`}
+                      className="w-full px-4 py-2 text-sm rounded-lg bg-gray-100 border border-blue-300 shadow-[4px_4px_10px_rgba(0,0,0,0.1),-4px_-4px_10px_rgba(255,255,255,0.6)] focus:outline-none"
                       placeholder="Enter name for certificate"
                     />
-                    {errors.nameOnCertificate && (
-                      <p className="text-xs text-red-500 mt-1">
-                        {errors.nameOnCertificate}
-                      </p>
-                    )}
                   </div>
 
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-1">
-                      Gut Number
+                    Survey/CTS/Plot No (Optional)
                     </label>
                     <input
                       type="text"
                       name="gutNumber"
                       value={formData.gutNumber}
                       onChange={handleChange}
-                      className={`w-full px-3 py-2 text-sm border rounded-lg focus:outline-none focus:ring-1 ${
-                        errors.gutNumber
-                          ? "border-red-500 focus:ring-red-200"
-                          : "border-gray-300 focus:ring-blue-200"
-                      }`}
-                      placeholder="Enter gut number"
+                      className="w-full px-4 py-2 text-sm rounded-lg bg-gray-100 border border-blue-300 shadow-[4px_4px_10px_rgba(0,0,0,0.1),-4px_-4px_10px_rgba(255,255,255,0.6)] focus:outline-none"
+                      placeholder="Enter Survey/CTS/Plot No if applicable"
                     />
-                    {errors.gutNumber && (
-                      <p className="text-xs text-red-500 mt-1">
-                        {errors.gutNumber}
-                      </p>
-                    )}
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
-                      District
-                    </label>
-                    <input
-                      type="text"
-                      name="district"
-                      value={formData.district}
-                      onChange={handleChange}
-                      className={`w-full px-3 py-2 text-sm border rounded-lg focus:outline-none focus:ring-1 ${
-                        errors.district
-                          ? "border-red-500 focus:ring-red-200"
-                          : "border-gray-300 focus:ring-blue-200"
-                      }`}
-                      placeholder="Enter district"
-                    />
-                    {errors.district && (
-                      <p className="text-xs text-red-500 mt-1">
-                        {errors.district}
-                      </p>
-                    )}
                   </div>
 
                   <div>
@@ -289,18 +236,37 @@ const SurveyForm = () => {
                       name="village"
                       value={formData.village}
                       onChange={handleChange}
-                      className={`w-full px-3 py-2 text-sm border rounded-lg focus:outline-none focus:ring-1 ${
-                        errors.village
-                          ? "border-red-500 focus:ring-red-200"
-                          : "border-gray-300 focus:ring-blue-200"
-                      }`}
+                      className="w-full px-4 py-2 text-sm rounded-lg bg-gray-100 border border-blue-300 shadow-[4px_4px_10px_rgba(0,0,0,0.1),-4px_-4px_10px_rgba(255,255,255,0.6)] focus:outline-none"
                       placeholder="Enter village"
                     />
-                    {errors.village && (
-                      <p className="text-xs text-red-500 mt-1">
-                        {errors.village}
-                      </p>
-                    )}
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      Taluka
+                    </label>
+                    <input
+                      type="text"
+                      name="taluka"
+                      value={formData.taluka}
+                      onChange={handleChange}
+                      className="w-full px-4 py-2 text-sm rounded-lg bg-gray-100 border border-blue-300 shadow-[4px_4px_10px_rgba(0,0,0,0.1),-4px_-4px_10px_rgba(255,255,255,0.6)] focus:outline-none"
+                      placeholder="Enter taluka"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      District
+                    </label>
+                    <input
+                      type="text"
+                      name="district"
+                      value={formData.district}
+                      onChange={handleChange}
+                      className="w-full px-4 py-2 text-sm rounded-lg bg-gray-100 border border-blue-300 shadow-[4px_4px_10px_rgba(0,0,0,0.1),-4px_-4px_10px_rgba(255,255,255,0.6)] focus:outline-none"
+                      placeholder="Enter district"
+                    />
                   </div>
                 </div>
 
@@ -315,86 +281,39 @@ const SurveyForm = () => {
                       name="mobileNumber"
                       value={formData.mobileNumber}
                       onChange={handleChange}
-                      className={`w-full px-3 py-2  text-sm border rounded-lg focus:outline-none focus:ring-1 ${
-                        errors.mobileNumber
-                          ? "border-red-500 focus:ring-red-200"
-                          : "border-gray-300 focus:ring-blue-200"
-                      }`}
+                      className="w-full px-4 py-2 text-sm rounded-lg bg-gray-100 border border-blue-300 shadow-[4px_4px_10px_rgba(0,0,0,0.1),-4px_-4px_10px_rgba(255,255,255,0.6)] focus:outline-none"
                       placeholder="Enter mobile number"
                     />
-                    {errors.mobileNumber && (
-                      <p className="text-xs text-red-500 mt-1">
-                        {errors.mobileNumber}
-                      </p>
-                    )}
                   </div>
+
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-1">
-                      GST Number (If Applicable)
+                      GST Number (Optional)
                     </label>
                     <input
                       type="text"
                       name="gstNumber"
                       value={formData.gstNumber}
                       onChange={handleChange}
-                      className={`w-full px-3 py-2 text-sm border rounded-lg focus:outline-none focus:ring-1 ${
-                        errors.gstNumber
-                          ? "border-red-500 focus:ring-red-200"
-                          : "border-gray-300 focus:ring-blue-200"
-                      }`}
+                      className="w-full px-4 py-2 text-sm rounded-lg bg-gray-100 border border-blue-300 shadow-[4px_4px_10px_rgba(0,0,0,0.1),-4px_-4px_10px_rgba(255,255,255,0.6)] focus:outline-none"
                       placeholder="Enter GST number if applicable"
                     />
-                    {errors.gstNumber && (
-                      <p className="text-xs text-red-500 mt-1">
-                        {errors.gstNumber}
-                      </p>
-                    )}
                   </div>
 
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-1">
-                      PAN Number (If Applicable)
+                      PAN Number (Optional)
                     </label>
                     <input
                       type="text"
                       name="panNumber"
                       value={formData.panNumber}
                       onChange={handleChange}
-                      className={`w-full px-3 py-2 text-sm border rounded-lg focus:outline-none focus:ring-1 ${
-                        errors.panNumber
-                          ? "border-red-500 focus:ring-red-200"
-                          : "border-gray-300 focus:ring-blue-200"
-                      }`}
-                      placeholder="Enter PAN number"
+                      className="w-full px-4 py-2 text-sm rounded-lg bg-gray-100 border border-blue-300 shadow-[4px_4px_10px_rgba(0,0,0,0.1),-4px_-4px_10px_rgba(255,255,255,0.6)] focus:outline-none"
+                      placeholder="Enter Pan number if applicable"
                     />
-                    {errors.panNumber && (
-                      <p className="text-xs text-red-500 mt-1">
-                        {errors.panNumber}
-                      </p>
-                    )}
                   </div>
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
-                      Taluka
-                    </label>
-                    <input
-                      type="text"
-                      name="taluka"
-                      value={formData.taluka}
-                      onChange={handleChange}
-                      className={`w-full px-3 py-2 text-sm border rounded-lg focus:outline-none focus:ring-1 ${
-                        errors.taluka
-                          ? "border-red-500 focus:ring-red-200"
-                          : "border-gray-300 focus:ring-blue-200"
-                      }`}
-                      placeholder="Enter taluka"
-                    />
-                    {errors.taluka && (
-                      <p className="text-xs text-red-500 mt-1">
-                        {errors.taluka}
-                      </p>
-                    )}
-                  </div>
+
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-1">
                       Pincode
@@ -404,94 +323,62 @@ const SurveyForm = () => {
                       name="pincode"
                       value={formData.pincode}
                       onChange={handleChange}
-                      className={`w-full px-3 py-2 text-sm border rounded-lg focus:outline-none focus:ring-1 ${
-                        errors.pincode
-                          ? "border-red-500 focus:ring-red-200"
-                          : "border-gray-300 focus:ring-blue-200"
-                      }`}
+                      className="w-full px-4 py-2 text-sm rounded-lg bg-gray-100 border border-blue-300 shadow-[4px_4px_10px_rgba(0,0,0,0.1),-4px_-4px_10px_rgba(255,255,255,0.6)] focus:outline-none"
                       placeholder="Enter pincode"
                     />
-                    {errors.pincode && (
-                      <p className="text-xs text-red-500 mt-1">
-                        {errors.pincode}
-                      </p>
-                    )}
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      Site Address
+                    </label>
+                    <input
+                      type="text"
+                      name="siteAddress"
+                      value={formData.siteAddress}
+                      onChange={handleChange}
+                      className="w-full px-4 py-2 text-sm rounded-lg bg-gray-100 border border-blue-300 shadow-[4px_4px_10px_rgba(0,0,0,0.1),-4px_-4px_10px_rgba(255,255,255,0.6)] focus:outline-none"
+                      placeholder="Enter SiteAddress"
+                    />
+                  </div>
+                  {/* Address Fields - Full Width */}
+                  <div className="mt-4">
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      Correspondence Address
+                    </label>
+                    <input
+                      type="text"
+                      name="correspondenceAddress"
+                      value={formData.correspondenceAddress}
+                      onChange={handleChange}
+                      className="w-full px-4 py-2 text-sm rounded-lg bg-gray-100 border border-blue-300 shadow-[4px_4px_10px_rgba(0,0,0,0.1),-4px_-4px_10px_rgba(255,255,255,0.6)] focus:outline-none"
+                      placeholder="Enter correspondence address"
+                    />
                   </div>
                 </div>
-
-                {/* Location Details Section */}
-                <div className="space-y-4"></div>
               </div>
 
-              {/* Address Fields - Full Width */}
-              <div className="grid grid-cols-1">
-                <div className="add" style={{ width: "65.2vw", marginTop:"-30px"}}>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Correspondence Address
-                  </label>
-                  <input
-                    type="text"
-                    name="correspondenceAddress"
-                    value={formData.correspondenceAddress}
-                    onChange={handleChange}
-                    className={`w-full px-3 py-2 text-sm border rounded-lg focus:outline-none focus:ring-1 ${
-                      errors.correspondenceAddress
-                        ? "border-red-500 focus:ring-red-200"
-                        : "border-gray-300 focus:ring-blue-200"
-                    }`}
-                    placeholder="Enter correspondence address"
-                  />
-                  {errors.correspondenceAddress && (
-                    <p className="text-xs text-red-500 mt-1">
-                      {errors.correspondenceAddress}
-                    </p>
-                  )}
-                </div>
-              </div>
-              <div
-                className="flex justify-end gap-4"
-                style={{ position: "relative", top: "-19px" }}
-              >
+              <div className="flex justify-end gap-4" style={{ position: "relative", top: "-15px" }}>
                 {/* Back Button */}
-                <div className="flex">
-                  <button
-                    style={{
-                      display: "flex",
-                      alignItems: "center",
-                      padding: "6px 18px",
-                      fontSize: "14px",
-                      color: "#2563eb",
-                      backgroundColor: "transparent",
-                      border: "2px solid #2563eb",
-                      borderRadius: "8px",
-                      cursor: "pointer",
-                      transition: "background-color 0.6s ease-in-out",
-                    }}
-                    onClick={() => navigate("/LandingPage")}
-                    onMouseEnter={(e) =>
-                      (e.target.style.backgroundColor = "#ebf2ff")
-                    }
-                    onMouseLeave={(e) =>
-                      (e.target.style.backgroundColor = "transparent")
-                    }
-                  >
-                    <i
-                      className="bi bi-arrow-left"
-                      style={{ marginRight: "8px" }}
-                    ></i>{" "}
-                    Back
-                  </button>
-                </div>
+                <button
+                  type="button"
+                  onClick={() => navigate("/LandingPage")}
+                  className="w-36 h-10 flex items-center justify-center gap-2 px-4 text-sm font-medium text-gray-700 border border-gray-400 bg-white rounded-lg transition duration-300 hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-gray-300"
+                >
+                  <i className="bi bi-arrow-left"></i>
+                  Back
+                </button>
 
                 {/* Submit Button */}
-                <div className="flex">
-                  <button
-                    type="submit"
-                    className="px-6 py-2 text-sm bg-blue-600 text-white rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-300 focus:ring-offset-2 transition-colors duration-200"
-                  >
-                    Submit
-                  </button>
-                </div>
+                <button
+                  type="submit"
+                  className="w-36 h-10 px-4 text-sm font-medium text-white rounded-lg transition duration-300 focus:outline-none focus:ring-2 focus:ring-blue-300"
+                  style={{
+                    backgroundImage: `radial-gradient(circle at center, #3b82f6, #60a5fa)`, // Blue-500 to Blue-400
+                  }}
+                >
+                  Submit
+                </button>
               </div>
             </form>
 
@@ -519,6 +406,9 @@ const SurveyForm = () => {
                     <button
                       onClick={() => {
                         setPopupMessage(null);
+                        if (popupType === "success") {
+                          navigate("/LandingPage"); // replace with your desired route
+                        }
                       }}
                       className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-300 transition-colors duration-200"
                     >

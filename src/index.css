@@ -10,23 +10,27 @@ body{
 
 
 .hide-scrollbar::-webkit-scrollbar {
-  width: 4px !important; /* Set the width of the scrollbar */
+  width: 4px !important; 
+  height: 4px !important;
 }
 
 .hide-scrollbar::-webkit-scrollbar-thumb {
   background-color: #888; /* Set the color of the scrollbar thumb */
   border-radius: 4px; /* Optional: add rounded corners */
+
 }
 
 /* For Firefox */
 .hide-scrollbar {
   scrollbar-width: thin !important; /* Makes the scrollbar thin */
   scrollbar-color: #888 transparent; /* Set the color of the scrollbar thumb and track */
+  
 }
 
 .scrollable-form {
   max-height: 500px;
   overflow-y: auto;
+  overflow-x: hidden;
   padding-right: 10px; /* Adds space to the left of the scrollbar */
 }
 
@@ -95,3 +99,18 @@ body{
 .collapsible-panel.collapsed {
   max-height: 0;
 }
+
+.distance-label {
+  font-size: 10px !important;       /* Smaller font size */
+  padding: 2px 5px !important;      /* Reduce padding */
+  background: rgba(255, 255, 255, 0.7); /* Semi-transparent white */
+  border-radius: 3px !important;    /* Slightly rounded corners */
+  border: 1px solid #ccc !important; /* Light border */
+  box-shadow: none !important;       /* Remove default shadow */
+  margin-top: -8px !important;      /* Adjust vertical position */
+}
+
+
+/* .leaflet-control-zoom {
+  display: none !important;
+} */

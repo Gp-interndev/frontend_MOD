@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Menu, X } from 'lucide-react';
 import { Link } from 'react-router-dom';
+import MonarchImage from "../assets/monarch_logo.jpeg";
 
 const Header = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -10,10 +11,13 @@ const Header = () => {
       <header className="bg-white rounded-lg shadow-md mx-auto max-w-[98%]">
         <div className="px-4 py-1 flex justify-between items-center">
           <div className="flex items-center gap-2">
-            <div className="w-8 h-8 bg-blue-200 rounded"></div>
+          <div
+  className="w-8 h-8 rounded bg-cover bg-center"
+  style={{ backgroundImage: `url(${MonarchImage})` }}
+></div>
             <div>
-              <h1 className="font-bold text-gray-800">MONARCH - MOD</h1>
-              <p className="text-sm text-gray-600" style={{ fontSize: "10px" }}>Memorandum of Deposit</p>
+              <h1 className="font-bold text-gray-800">Monarch Surveyors & Engineering Consultants Pvt.Ltd.</h1>
+              <p className="text-sm text-gray-600" style={{ fontSize: "10px" }}>MOD-Ministry of Defence NOC</p>
             </div>
           </div>
           <button onClick={() => setIsMenuOpen(!isMenuOpen)} className="p-2 hover:bg-gray-100 rounded-lg">

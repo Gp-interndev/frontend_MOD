@@ -27,28 +27,47 @@ const LandingPage = () => {
         />
 
         <div className="max-w-4xl w-full text-center space-y-6 p-8 rounded-lg backdrop-blur-sm">
-          <h1 className="text-5xl font-bold text-gray-900 mb-4" style={{ textAlign: "center" }}>
-            Memorandum of Deposit
+          <h1
+            className=" font-bold  mb-2 text-transparent bg-clip-text bg-[linear-gradient(90deg,_#000000,_#3b82f6)]"
+            style={{
+              WebkitBackgroundClip: "text",
+              WebkitTextFillColor: "transparent",
+              textAlign: "center",
+              fontSize:"42px"
+            }}
+          >
+            Welcome to Monarch MOD
           </h1>
 
-          <p className="text-xl text-gray-700 mb-8">
-            Access land and building details, expenses, completion records, and more, all in one place.
+          <p className="text-gray-700" style={{fontSize:"17.5px", marginBottom:"40px"}}>
+            Monarch MOD (Memorandum of Deposit) provides a secure, transparent,
+            and efficient platform for managing property pledges and deposits.
+            Designed for both citizens and authorities, we ensure compliance,
+            clarity, and peace of mind in every transaction.
           </p>
 
           <div className="flex justify-center gap-4">
             <button
               onClick={() => navigate("/SurveyForm")}
-              className="border-2 border-blue-600 text-blue-600 px-6 rounded-md hover:bg-blue-50 transition-colors"
+              className=" w-40 border-2 border-blue-600 text-blue-600 px-6 rounded-md hover:bg-blue-50 transition-colors"
               style={{ height: "35px" }}
             >
               New Form
             </button>
+
             <button
               onClick={() => navigate("/FileUpload")}
-              className="bg-blue-600 text-white px-6 rounded-md hover:bg-blue-700 transition-colors"
+              className="w-40 border-2 border-blue-600 text-blue-600 px-6 rounded-md transition-colors hover:bg-blue-50"
               style={{ height: "35px" }}
             >
-              Forward Form Data
+              Form Data
+            </button>
+            <button
+              onClick={() => navigate("/Certificate")}
+              className="w-40 border-2 border-blue-600 text-blue-600 px-6 rounded-md transition-colors"
+              style={{ height: "35px" }}
+            >
+              Get Certificate
             </button>
           </div>
         </div>

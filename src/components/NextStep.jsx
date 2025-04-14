@@ -19,7 +19,7 @@ const NextStep = () => {
       formData.append('file', location.state.file);
 
       try {
-        const response = await fetch("http://localhost:5000/process_csv", { 
+        const response = await fetch("http://127.0.0.1:5000/process_csv", { 
           method: 'POST',
           body: formData,
         });
@@ -45,6 +45,8 @@ const NextStep = () => {
     fetchData();
   }, [location.state?.file]);
 
+  console.log("NextStep - Passing job number to DataTable:", location.state?.jobNumber);
+
   return (
     <div>
       {error && <p style={{ color: 'red' }}>{error}</p>}
@@ -52,10 +54,15 @@ const NextStep = () => {
         <DataTable 
           data={fileData} 
           outwardNumber={location.state?.outwardNumber} // Pass outward number
+          jobNumber={location.state?.jobNumber}
+          
+          
         />
+        
       ) : (
         <p></p>
       )}
+      
     </div>
   );
 };

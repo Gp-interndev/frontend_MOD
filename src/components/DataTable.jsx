@@ -1,51 +1,28 @@
-import React, { useState, useEffect, useMemo } from "react";
+import React, { useState, useEffect, useMemo, useRef } from "react";
 import Header from "./Header";
-import { useNavigate } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import MapComponent from "./mapcomponent";
 
-const DataTable = ({ data, outwardNumber }) => {
+const DataTable = ({ data, outwardNumber, jobNumber }) => {
   const cqlFilterZone = `outward = '${outwardNumber}' AND typeofsite = 'plot'`; // Define cqlFilterZone
   const cqlFilterWard1 = "Aviation_N = 'NDA'"; // Define cqlFilterWard if needed
   const cqlFilterWard2 = "Aviation_N = 'Lohagaon'";
-  const cqlFilterWard3 = "	PALETTE_INDEX = '253.0'";
-  const cqlFiltertopo = "PALETTE_INDEX = '253.0'";
-
-  // const [cqlFilterZone, setCqlFilterZone] = useState('');
-  // const [cqlFilterWard, setCqlFilterWard] = useState('');
-
-  // const applyZoneFilter = () => {
-  //   setCqlFilterZone(cqlFilterZone ? '' : "zone = 'D.M.C. Zone 5'");
-  // };
-
-  // const applyWardFilter = () => {
-  //   setCqlFilterWard(cqlFilterWard ? '' : "ward_name = 'Ward 10'");
-  // };
-
-  // return (
-  //   <div>
-  //     <MapComponent cqlFilterZone={cqlFilterZone} cqlFilterWard={cqlFilterWard} />
-
-  //     {/* Buttons to Apply Filters */}
-  //     <div style={{ position: 'absolute', bottom: '10px', left: '10px', zIndex: 1000, background: 'white', padding: '10px', borderRadius: '5px' }}>
-  //       <button onClick={applyZoneFilter}>
-  //         {cqlFilterZone ? 'Remove Zone Filter' : 'Apply Zone Filter'}
-  //       </button>
-  //       <br /><br />
-  //       <button onClick={applyWardFilter}>
-  //         {cqlFilterWard ? 'Remove Ward Filter' : 'Apply Ward Filter'}
-  //       </button>
-  //     </div>
-  //   </div>
-  // );
+  const location = useLocation();
 
   const [activeMap, setActiveMap] = useState("map1");
+
+  console.log("DataTable - Received job number as prop:", jobNumber);
+  console.log(
+    "DataTable - Job number from location state:",
+    location.state?.jobNumber
+  );
 
   const navigate = useNavigate();
   const [userData, setUserData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [isGenerating, setIsGenerating] = useState(false);
   const [error, setError] = useState(null);
-  const [aviationData, setAviationData] = useState(null);
+  const [aviationData, setAviationData] = useState([]);
   const [geometry, setGeometry] = useState(null);
 
   // Memoized data fetching function with improved error handling
@@ -55,7 +32,7 @@ const DataTable = ({ data, outwardNumber }) => {
 
       try {
         const response = await fetch(
-          `http://localhost:5000/get_user/${outwardNumber}`,
+          `http://127.0.0.1:5000/get_user/${outwardNumber}`,
           {
             method: "GET",
             headers: {
@@ -83,39 +60,14 @@ const DataTable = ({ data, outwardNumber }) => {
     [outwardNumber]
   );
 
-  // useEffect(() => {
-  //   const fetchAviationData = async () => {
-  //     if (outwardNumber) {
-  //       try {
-  //         const response = await fetch(
-  //           `http://localhost:5000/get_aviation_data/${outwardNumber}`
-  //         );
-  //         if (response.ok) {
-  //           const data = await response.json();
-  //           console.log("Aviation Data Fetched:", data);
-  //           setAviationData(data); // Set the updated aviation data in the state
-  //         } else {
-  //           console.log("Error fetching aviation data:", await response.json());
-  //           setAviationData(null);
-  //         }
-  //       } catch (error) {
-  //         console.error("Error fetching aviation data:", error);
-  //       }
-  //     }
-  //   };
-
-  //   fetchAviationData();
-  // }, [outwardNumber]);
-
   useEffect(() => {
     const fetchAviationData = async () => {
       if (!outwardNumber) return;
 
       setLoading(true);
       try {
-        // Fetch both geometry and aviation data using the combined API
         const response = await fetch(
-          `http://localhost:5000/get_aviation_data/${outwardNumber}`
+          `http://127.0.0.1:5000/get_aviation_data/${outwardNumber}`
         );
 
         if (!response.ok) {
@@ -124,12 +76,12 @@ const DataTable = ({ data, outwardNumber }) => {
 
         const data = await response.json();
 
-        // Set both geometry and aviation data to state
+        // Set geometry and aviation data to state
         if (data.geometry) {
           setGeometry(data.geometry);
         }
         if (data.aviation_data) {
-          setAviationData(data.aviation_data);
+          setAviationData(data.aviation_data); // Update with array of zones
         }
       } catch (err) {
         console.error("Error fetching data:", err);
@@ -160,13 +112,19 @@ const DataTable = ({ data, outwardNumber }) => {
     loadUserData();
   }, [fetchUserData]);
 
+  // old
+  const documentJobNumber = jobNumber || location.state?.jobNumber || "";
+
   const handleSubmit = async () => {
     //  old handlesubmit for submiting and processing file
     try {
       setIsGenerating(true);
 
+      // const jobNumber = location.state?.jobNumber || '';
+      console.log("Sending job number to API:", documentJobNumber);
+
       const generateResponse = await fetch(
-        "http://localhost:5000/generate_doc",
+        "http://127.0.0.1:5000/generate_doc",
         {
           method: "POST",
           headers: {
@@ -175,6 +133,7 @@ const DataTable = ({ data, outwardNumber }) => {
           body: JSON.stringify({
             outwardNumber,
             fileData: data,
+            jobNumber: documentJobNumber,
           }),
         }
       );
@@ -186,7 +145,9 @@ const DataTable = ({ data, outwardNumber }) => {
       }
 
       if (result.success) {
-        navigate("/pdf-viewer", { state: { outwardNumber, data } });
+        navigate("/pdf-viewer", {
+          state: { outwardNumber, data, documentJobNumber },
+        });
       } else {
         throw new Error(result.error || "Failed to generate document");
       }
@@ -198,80 +159,11 @@ const DataTable = ({ data, outwardNumber }) => {
     }
   };
 
-  // const handleSubmit = async () => {
-  //   // new handlesubmit for saving data to database also
-  //   try {
-  //     setIsGenerating(true);
-
-  //     // Get the file from the NextStep component through location state
-  //     // We need to access one level up since NextStep is the parent component
-  //     const file =
-  //       window.history.state?.usr?.file || window.history.state?.state?.file;
-
-  //     if (!file) {
-  //       throw new Error("File not available. Please upload again.");
-  //     }
-
-  //     // First, update the CSV data in the database
-  //     const formData = new FormData();
-  //     formData.append("file", file);
-  //     formData.append("outwardNumber", outwardNumber);
-
-  //     console.log("Updating CSV data with outward number:", outwardNumber);
-
-  //     // Send the data to the backend to update the database
-  //     const updateResponse = await fetch("http://localhost:5000/update_csv", {
-  //       method: "POST",
-  //       body: formData,
-  //     });
-
-  //     const updateResult = await updateResponse.json();
-
-  //     if (!updateResponse.ok) {
-  //       throw new Error(updateResult.error || "Failed to update CSV data");
-  //     }
-
-  //     console.log("CSV data updated successfully:", updateResult.message);
-
-  //     // Then proceed with document generation
-  //     const generateResponse = await fetch(
-  //       "http://localhost:5000/generate_doc",
-  //       {
-  //         method: "POST",
-  //         headers: {
-  //           "Content-Type": "application/json",
-  //         },
-  //         body: JSON.stringify({
-  //           outwardNumber,
-  //           fileData: data,
-  //         }),
-  //       }
-  //     );
-
-  //     const result = await generateResponse.json();
-
-  //     if (!generateResponse.ok) {
-  //       throw new Error(result.error || "Failed to generate document");
-  //     }
-
-  //     if (result.success) {
-  //       navigate("/pdf-viewer", { state: { outwardNumber, data } });
-  //     } else {
-  //       throw new Error(result.error || "Failed to generate document");
-  //     }
-  //   } catch (error) {
-  //     console.error("Operation Error:", error);
-  //     alert("Error: " + error.message);
-  //   } finally {
-  //     setIsGenerating(false);
-  //   }
-  // };
-
   const handleBackClick = () => {
-    navigate(-1);
+    navigate("/LandingPage");
   };
 
-  // Rest of your styles remain the same
+  // Rest of styles
   const containerStyle = {
     display: "flex",
     justifyContent: "space-between",
@@ -282,11 +174,11 @@ const DataTable = ({ data, outwardNumber }) => {
 
   const leftColumnStyle = {
     width: "50%",
-    height: "325px",
+    height: "250px",
     position: "relative",
-    left: "40px",
+    left: "20px",
     overflowY: "auto",
-    top: "-128px",
+    top: "-150px",
     borderRadius: "5px",
     borderTop: "none",
     borderBottom: "2px solid #333",
@@ -298,8 +190,8 @@ const DataTable = ({ data, outwardNumber }) => {
     display: "flex",
     flexDirection: "column",
     justifyContent: "space-between",
-    top: "-280px",
-    height: "80vh",
+    top: "-400px",
+    height: "85vh",
   };
 
   const tableStyle = {
@@ -333,18 +225,6 @@ const DataTable = ({ data, outwardNumber }) => {
     fontSize: "10px",
   };
 
-  // const mapStyle = {
-  //   border: "1px solid #ccc",
-  //   borderRadius: "5px",
-  //   boxShadow: "0 4px 8px rgba(0, 0, 0, 0.1)",
-  //   position: "relative",
-  //   left: "90px",
-  //   width: "80%",
-  //   height: "70vh",
-  //   top: "-65px",
-  //   marginBottom:"5px"
-  // };
-
   const mapStyle = {
     border: "1px solid #ccc",
     borderRadius: "5px",
@@ -371,7 +251,7 @@ const DataTable = ({ data, outwardNumber }) => {
     justifyContent: "space-between",
     marginTop: "10px",
     position: "relative",
-    top: "-80px",
+    top: "-95px",
   };
 
   const backbuttonStyle = {
@@ -430,79 +310,138 @@ const DataTable = ({ data, outwardNumber }) => {
       <Header />
       <div
         className="content"
-        style={{ position: "relative", left: "40px", top: "20px" }}
+        style={{ position: "relative", left: "20px", top: "10px" }}
       >
-        {/* <h2 className="text-lg font-semibold">Review Land Information</h2>
-        <p className="para" style={{ width: "600px", fontSize: "12.3px" }}>
-          Please review the land details extracted from your uploaded file. The
-          information is displayed on the left, while the land layout is shown
-          on the map to the right. Once you're satisfied, the data will be saved
-          to the database.
-        </p> */}
-        {/* <hr className="w-1/2 border bg-blue-200 border-blue-200 mb-2 mt-2" /> */}
-        <h3 className="mb-1" style={{ fontWeight: "bold", marginTop: "-10px" }}>
-          1. Important Information
-        </h3>
+        <div
+          className="bg-gray-200 p-4 rounded-lg shadow-sm"
+          style={{ width: "50vw", backgroundColor: "#f9f9f9", paddingBottom:"2px" }}
+        >
+          <h3
+            className="mb-1 font-bold mt-[-10px] text-transparent bg-clip-text bg-[linear-gradient(to_right,_#000000,_#3b82f6,_#60a5fa)]"
+            style={{ fontSize: "17px" }}
+          >
+            ❮ Application Details
+          </h3>
 
-        {loading ? (
-          <p>Loading user information...</p>
-        ) : userData ? (
-          <p className="text-gray-700" style={{ fontSize: "12.2px" }}>
-            <div className="grid grid-cols-2 gap-y-1  max-w-lg">
-              <div>
-                Outward Number:<strong>{userData.outwardnumber}</strong>
-              </div>
-              <div>
-                Survey/Gut Number:{" "}
-                <strong>{userData.gutnumber || "N/A"}</strong>
-              </div>
+          <hr
+            className="h-[0.5px] mb-4 w-full rounded border-none"
+            style={{
+              // adjust based on your text length
+              background:
+                "linear-gradient(to right, #000000, #3b82f6, #60a5fa)",
+            }}
+          />
 
-              <div>
-                Owner Name: <strong>{userData.name || "N/A"}</strong> 
-              </div>
-              <div>
-                Phone Number: <strong>{userData.mobilenumber || "N/A"}</strong> 
-              </div>
-
-              {/* <div>
-                <strong>Address:</strong> {userData.siteadress || "N/A"}
-              </div> */}
-              <div>
-                Village: <strong>{userData.village || "N/A"}</strong> 
-              </div>
-
-              <div>
-                Taluka: <strong>{userData.taluka || "N/A"}</strong> 
-              </div>
-              <div>
-                District: <strong>{userData.district || "N/A"}</strong>
-              </div>
-
-              <div className="col-span-1">
-                Pin Code: <strong>{userData.pincode || "N/A"}</strong> 
+          {loading ? (
+            <p>Loading user information...</p>
+          ) : userData ? (
+            <div
+              className="rounded-lg p-2 max-w-2xl text-gray-700 text-sm shadow-lg"
+              style={{
+                background: "radial-gradient(circle at center,  #f4f4f4)",
+              }}
+            >
+              <div className="grid grid-cols-2 gap-y-1">
+                <div className="grid grid-cols-2">
+                  <span
+                    className="text-black whitespace-nowrap"
+                    style={{ fontSize: "13px" }}
+                  >
+                    Outward Number:
+                  </span>
+                  <strong>{userData.outwardnumber}</strong>
+                </div>
+                <div className="grid grid-cols-2">
+                  <span className="text-black whitespace-nowrap">
+                    Survey/CTS/Plot No:
+                  </span>
+                  <strong>{userData.gutnumber || "N/A"}</strong>
+                </div>
+                <div className="grid grid-cols-2">
+                  <span className="text-black whitespace-nowrap">
+                    Owner Name:
+                  </span>
+                  <strong>{userData.name || "N/A"}</strong>
+                </div>
+                <div className="grid grid-cols-2">
+                  <span className="text-black whitespace-nowrap">
+                    Phone Number:
+                  </span>
+                  <strong>{userData.mobilenumber || "N/A"}</strong>
+                </div>
+                <div className="grid grid-cols-2">
+                  <span className="text-black whitespace-nowrap">Village:</span>
+                  <strong>{userData.village || "N/A"}</strong>
+                </div>
+                <div className="grid grid-cols-2">
+                  <span className="text-black whitespace-nowrap">Taluka:</span>
+                  <strong>{userData.taluka || "N/A"}</strong>
+                </div>
+                <div className="grid grid-cols-2">
+                  <span className="text-black whitespace-nowrap">
+                    District:
+                  </span>
+                  <strong>{userData.district || "N/A"}</strong>
+                </div>
+                <div className="grid grid-cols-2">
+                  <span className="text-black whitespace-nowrap">
+                    Pin Code:
+                  </span>
+                  <strong>{userData.pincode || "N/A"}</strong>
+                </div>
               </div>
             </div>
-          </p>
-        ) : (
-          <p>No user data available</p>
-        )}
+          ) : (
+            <p>No user data available</p>
+          )}
 
-        <h3 className="mt-2 mb-2" style={{ fontWeight: "bold" }}>
-          2. Elevation Details
-        </h3>
-        <p className="text-gray-700 text-sm flex justify-start gap-36">
-          <span>
-            Zone: <strong>{aviationData?.zone || "N/A"}</strong>
-          </span>
-          <span>
-            Elevation: <strong>{aviationData?.elevation || "N/A"}</strong>
-          </span>
-        </p>
-
-        <h3 className="mt-3  mb-2" style={{ fontWeight: "bold" }}>
-          3. Plot Coordinate and Elevation
-        </h3>
+          <h3
+            className="mt-2 mb-2 font-bold text-transparent bg-clip-text bg-[linear-gradient(to_right,_#000000,_#3b82f6,_#60a5fa)]"
+            style={{ fontSize: "17px" }}
+          >
+            ❮ Elevation Details
+          </h3>
+          <hr
+            className="h-[0.5px] mb-4 w-full rounded border-none"
+            style={{
+              // adjust based on your text length
+              background:
+                "linear-gradient(to right, #000000, #3b82f6, #60a5fa)",
+            }}
+          />
+          <div
+            className="rounded-lg p-4 shadow-lg mb-4"
+            style={{
+              background: "radial-gradient(circle at center,#e5e5e5, #f4f4f4)",
+            }}
+          >
+            <p className="text-gray-700 text-sm flex justify-between">
+              <span className="w-1/2">
+                <span className="text-black">Zone:</span>{" "}
+                <strong>
+                  {aviationData.length > 0
+                    ? aviationData.map((item) => item.zone).join(", ")
+                    : "N/A"}
+                </strong>
+              </span>
+              <span className="w-1/2">
+                <span className="text-black">Elevation:</span>{" "}
+                <strong>
+                  {aviationData.length > 0
+                    ? aviationData.map((item) => item.elevation).join(", ")
+                    : "N/A"}
+                </strong>
+              </span>
+            </p>
+          </div>
+        </div>
       </div>
+      <h3
+        className="mb-1 font-bold mt-[15px] ms-6  text-transparent bg-clip-text bg-[linear-gradient(to_right,_#000000,_#3b82f6,_#60a5fa)]"
+        style={{ fontSize: "17px" }}
+      >
+        ❮ Plot Coordinate and Elevation
+      </h3>
 
       <div style={containerStyle}>
         <div className="hide-scrollbar" style={leftColumnStyle}>
@@ -513,9 +452,10 @@ const DataTable = ({ data, outwardNumber }) => {
                   <th>Point Name</th>
                   {/* <th>Latitude</th>
                   <th>Longitude</th> */}
-                  <th>Height</th>
+
                   <th>Longitude(DMS)</th>
                   <th>Latitude (DMS)</th>
+                  <th>Height</th>
                   <th>NDA Distance (km)</th>
                   <th>LOH Distance (km)</th>
                 </tr>
@@ -526,9 +466,10 @@ const DataTable = ({ data, outwardNumber }) => {
                     <td style={cellStyle}>{item.P_name}</td>
                     {/* <td style={cellStyle}>{item.latitude.toFixed(4)}</td>
                     <td style={cellStyle}>{item.longitude.toFixed(4)}</td> */}
-                    <td style={cellStyle}>{Math.floor(item.Height)}</td>
+
                     <td style={cellStyle}>{item.longitude_dms}</td>
                     <td style={cellStyle}>{item.latitude_dms}</td>
+                    <td style={cellStyle}>{Math.floor(item.Height)}</td>
                     <td style={cellStyle}>
                       {item.distances_to_reference_points_km.NDA.toFixed(1)}
                     </td>
@@ -544,14 +485,14 @@ const DataTable = ({ data, outwardNumber }) => {
 
         <div style={rightColumnStyle}>
           <div
-            className="p-1 w-[100%] md:w-[95%] lg:w-[85%] h-[80vh] relative overflow-hidden"
-            style={{ top: "-70px", left: "80px" }}
+            className=" maps p-1 w-[100%] md:w-[95%] lg:w-[90%] relative overflow-hidden"
+            style={{ top: "-80px", left: "50px" }}
           >
             {/* Buttons with white shadow background */}
             <div className="flex justify-between space-x-1 mb-4 p-2 shadow-lg rounded-lg bg-white sticky top-0 z-10">
               <button
                 onClick={() => setActiveMap("map1")}
-                className={`px-9 py-1 text-sm rounded transition-all ${
+                className={`px-6 py-1 text-sm rounded transition-all ${
                   activeMap === "map1"
                     ? "bg-blue-500 text-white"
                     : "bg-gray-200 hover:bg-gray-300"
@@ -561,7 +502,7 @@ const DataTable = ({ data, outwardNumber }) => {
               </button>
               <button
                 onClick={() => setActiveMap("map2")}
-                className={`px-8 py-1 text-sm rounded transition-all ${
+                className={`px-4 py-1 text-sm rounded transition-all ${
                   activeMap === "map2"
                     ? "bg-blue-500 text-white"
                     : "bg-gray-200 hover:bg-gray-300"
@@ -571,7 +512,7 @@ const DataTable = ({ data, outwardNumber }) => {
               </button>
               <button
                 onClick={() => setActiveMap("map3")}
-                className={`px-6 py-1 text-sm rounded transition-all ${
+                className={`px-3 py-1 text-sm rounded transition-all ${
                   activeMap === "map3"
                     ? "bg-blue-500 text-white"
                     : "bg-gray-200 hover:bg-gray-300"
@@ -579,44 +520,74 @@ const DataTable = ({ data, outwardNumber }) => {
               >
                 TOPOSHEET-MAP
               </button>
+
+              <button
+                onClick={() => setActiveMap("map4")}
+                className={`px-3 py-1 text-sm rounded transition-all ${
+                  activeMap === "map4"
+                    ? "bg-blue-500 text-white"
+                    : "bg-gray-200 hover:bg-gray-300"
+                }`}
+              >
+                CCZM-MAP
+              </button>
             </div>
 
             {/* Render the active map based on state */}
             <div className="h-[calc(100%-60px)] overflow-hidden">
               {activeMap === "map1" && (
                 <MapComponent
+                  className="map-container"
                   cqlFilterZone={cqlFilterZone}
                   cqlFilterWard={cqlFilterWard1}
                   initialShowWMS1={false}
                   initialShowWMS2={true}
-                  initialShowWMSPOINTS = {true}
+                  initialShowWMSPOINTS={true}
                   initialShowWMS3={true}
                   initialtoposheet={false}
                   showLayerNames={true}
                 />
               )}
+
               {activeMap === "map2" && (
                 <MapComponent
+                  className="map-container"
                   cqlFilterZone={cqlFilterZone}
                   cqlFilterWard={cqlFilterWard2}
                   initialtosmtopo={true}
                   initialShowWMS1={false}
                   initialShowWMS2={true}
-                  initialShowWMSPOINTS = {true}
+                  initialShowWMSPOINTS={true}
                   initialShowWMS3={true}
                   initialtoposheet={false}
                   showLayerNames={true}
                 />
               )}
+
               {activeMap === "map3" && (
                 <MapComponent
+                  className="map-container"
                   cqlFilterZone={cqlFilterZone}
                   initialtosmtopo={false}
                   initialShowWMS1={false}
                   initialShowWMS2={true}
-                  initialShowWMSPOINTS = {true}
+                  initialShowWMSPOINTS={true}
                   initialShowWMS3={false}
                   initialtoposheet={true}
+                  showLayerNames={true}
+                />
+              )}
+
+              {activeMap === "map4" && (
+                <MapComponent
+                  className="map-container"
+                  cqlFilterZone={cqlFilterZone}
+                  initialtosmtopo={false}
+                  initialShowWMS1={true}
+                  initialShowWMS2={true}
+                  initialShowWMSPOINTS={true}
+                  initialShowWMS3={false}
+                  initialtoposheet={false}
                   showLayerNames={true}
                 />
               )}
@@ -649,7 +620,7 @@ const DataTable = ({ data, outwardNumber }) => {
                 </div>
               ) : (
                 <>
-                  Submit
+                  Confirm and Save
                   <i
                     className="bi bi-file-earmark-text"
                     style={fileIconStyle}
@@ -666,4 +637,3 @@ const DataTable = ({ data, outwardNumber }) => {
 };
 
 export default DataTable;
-

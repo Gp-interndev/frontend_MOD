@@ -79,42 +79,53 @@ const FileUpload = () => {
     setOutwardNumber(e.target.value);
   };
 
+  const extractJobNumber = (filename) => {
+    const match = filename.match(/Job-(\d+)/i);
+    return match ? match[1] : "";
+  };
+
   const handleNextClick = async () => {
     if (isFileUploaded && outwardNumber.trim()) {
       setShowProgressBar(true);
       setIsProcessing(true);
-      
+
       try {
         // Create a FormData object to send the file and outward number
         const formData = new FormData();
-        formData.append('file', file);
-        formData.append('outwardNumber', outwardNumber);
-        
+        formData.append("file", file);
+        formData.append("outwardNumber", outwardNumber);
+        const jobNumber = extractJobNumber(fileName);
+        console.log("Extracted job number:", jobNumber);
+
         // Send the data to the backend
-        const response = await fetch('http://localhost:5000/update_csv', {
-          method: 'POST',
+        const response = await fetch("http://127.0.0.1:5000/update_csv", {
+          method: "POST",
           body: formData,
         });
-        
+
         const data = await response.json();
-        
+
         if (response.ok) {
           console.log("Data saved successfully:", data.message);
-          
+
           // Now fetch both geometry and aviation data using the combined API
-          const geometryAndAviationResponse = await fetch(`http://localhost:5000/get_aviation_data/${outwardNumber}`);
-          const geometryAndAviationData = await geometryAndAviationResponse.json();
-          
+          const geometryAndAviationResponse = await fetch(
+            `http://127.0.0.1:5000/get_aviation_data/${outwardNumber}`
+          );
+          const geometryAndAviationData =
+            await geometryAndAviationResponse.json();
+
           if (geometryAndAviationResponse.ok) {
             // Navigate after successful processing with all data
             const timeout = setTimeout(() => {
               navigate("/next-step", {
-                state: { 
-                  file: file, 
+                state: {
+                  file: file,
                   outwardNumber: outwardNumber,
                   uploadSuccess: true,
                   geometry: geometryAndAviationData.geometry,
                   aviationData: geometryAndAviationData.aviation_data || null,
+                  jobNumber: jobNumber,
                 },
               });
             }, 2000);
@@ -123,12 +134,13 @@ const FileUpload = () => {
             // If the combined API request fails, navigate with the available data
             const timeout = setTimeout(() => {
               navigate("/next-step", {
-                state: { 
-                  file: file, 
+                state: {
+                  file: file,
                   outwardNumber: outwardNumber,
                   uploadSuccess: true,
                   geometry: null,
                   aviationData: null,
+                  jobNumber: jobNumber,
                 },
               });
             }, 2000);
@@ -150,83 +162,6 @@ const FileUpload = () => {
       alert("Please enter an outward number");
     }
   };
-  
-
-  // const handleNextClick = async () => {
-  //   if (isFileUploaded && outwardNumber.trim()) {
-  //     setShowProgressBar(true);
-  //     setIsProcessing(true);
-      
-  //     try {
-  //       // Create a FormData object to send the file and outward number
-  //       const formData = new FormData();
-  //       formData.append('file', file);
-  //       formData.append('outwardNumber', outwardNumber);
-        
-  //       // Send the data to the backend
-  //       const response = await fetch('http://localhost:5000/update_csv', {
-  //         method: 'POST',
-  //         body: formData,
-  //       });
-        
-  //       const data = await response.json();
-        
-  //       if (response.ok) {
-  //         console.log("Data saved successfully:", data.message);
-  //         // Navigate after successful upload with a slight delay
-  //         const timeout = setTimeout(() => {
-  //           navigate("/next-step", {
-  //             state: { 
-  //               file: file, 
-  //               outwardNumber: outwardNumber,
-  //               uploadSuccess: true 
-  //             },
-  //           });
-  //         }, 2000);
-  //         setNavigationTimeout(timeout);
-  //       } else {
-  //         console.error("Error saving data:", data.error);
-  //         alert(data.error || "Failed to save data to database");
-  //         setIsProcessing(false);
-  //         setShowProgressBar(false);
-  //       }
-  //     } catch (error) {
-  //       console.error("Network error:", error);
-  //       alert("Network error occurred. Please try again.");
-  //       setIsProcessing(false);
-  //       setShowProgressBar(false);
-  //     }
-  //   } else if (!outwardNumber.trim()) {
-  //     alert("Please enter an outward number");
-  //   }
-  // };
-
-
-  // const handleNextClick = async () => {
-  //   if (isFileUploaded && outwardNumber.trim()) {
-  //     setShowProgressBar(true);
-  //     setIsProcessing(true);
-      
-  //     try {
-  //       // Simply navigate to the next step with the file and outward number
-  //       // No database update here anymore
-  //       navigate("/next-step", {
-  //         state: { 
-  //           file: file, 
-  //           outwardNumber: outwardNumber,
-  //           uploadSuccess: true 
-  //         },
-  //       });
-  //     } catch (error) {
-  //       console.error("Navigation error:", error);
-  //       alert("Error occurred. Please try again.");
-  //       setIsProcessing(false);
-  //       setShowProgressBar(false);
-  //     }
-  //   } else if (!outwardNumber.trim()) {
-  //     alert("Please enter an outward number");
-  //   }
-  // };
 
   const getDeleteButtonClasses = () => {
     if (isProcessing && !isCanceling) {
@@ -248,7 +183,7 @@ const FileUpload = () => {
     setIsLoading(true);
     try {
       const response = await fetch(
-        `http://localhost:5000/get_user/${outwardNumber}`,  //http://127.0.0.1:5000/get_user/${outwardNumber}
+        `http://127.0.0.1:5000/get_user/${outwardNumber}`, //http://127.0.0.1:5000/get_user/${outwardNumber}
         {
           method: "GET",
           headers: {
@@ -362,7 +297,7 @@ const FileUpload = () => {
               type="file"
               ref={fileInputRef}
               className="hidden"
-              accept=".xlsx"
+              accept=".csv, .xlsx,"
               onChange={handleFileChange}
             />
 
@@ -374,7 +309,7 @@ const FileUpload = () => {
                 aria-valuenow="50"
                 aria-valuemin="0"
                 aria-valuemax="100"
-                style={{ height: "20px", backgroundColor: "#e0e0e0"}}
+                style={{ height: "20px", backgroundColor: "#e0e0e0" }}
               >
                 <div
                   className="progress-bar"
@@ -383,7 +318,6 @@ const FileUpload = () => {
                     backgroundColor: "blue",
                     height: "100%",
                     transition: "width 2s ease-in-out",
-                    
                   }}
                   ref={(el) => {
                     if (el) {

@@ -67,7 +67,7 @@ const findNearestPoints = (polygon1Points, polygon2Points) => {
       const [lat1, lng1] = polygon1Points[i];
       const [lat2, lng2] = polygon2Points[j];
 
-      // Calculate squared distance (no need for square root for comparison)
+      // Calculate squared distance
       const dx = lat2 - lat1;
       const dy = lng2 - lng1;
       const squaredDistance = dx * dx + dy * dy;
@@ -79,7 +79,7 @@ const findNearestPoints = (polygon1Points, polygon2Points) => {
       }
     }
   }
-// alert(minDistance)
+  // alert(minDistance)
   return {
     point1: nearestPoint1,
     point2: nearestPoint2,
@@ -180,14 +180,16 @@ const highlightFeaturesAndConnect = (
         className: "connection-line",
       }).addTo(map);
 
-      const distance = map.distance(connectionPoints[0], connectionPoints[1]).toFixed(2);
+      const distance = map
+        .distance(connectionPoints[0], connectionPoints[1])
+        .toFixed(2);
       // alert(distance)
       // Bind popup showing distance
       // polyline.bindPopup(`Distance: ${(distance/1000).toFixed(2)}. Km`).openPopup();
 
       // alert(totalDistance,"totaldistance")
       const formattedDistance = (distance / 1000).toFixed(2) + " km"; // Convert meters to kilometers
-      polyline.bindTooltip(`Distance: ${formattedDistance}`, {
+      polyline.bindTooltip(`${formattedDistance}`, {
         permanent: true, // Show the tooltip permanently
         direction: "center", // Center the tooltip on the line
         className: "distance-label", // Add a custom class for
@@ -259,8 +261,6 @@ const MapComponent = ({
   initialShowWMSPOINTS = true,
   showLayerNames = true,
 }) => {
-
-
   const [isLayerPanelCollapsed, setIsLayerPanelCollapsed] = useState(false);
   const [opacityWMS1, setOpacityWMS1] = useState(1);
   const [opacityWMS2, setOpacityWMS2] = useState(1);
@@ -271,11 +271,13 @@ const MapComponent = ({
   const [showWmsPOINTS, setShowWMSPOINTS] = useState(initialShowWMSPOINTS);
 
   const [showWMS3, setShowWMS3] = useState(initialShowWMS3);
+  const [showWMS4, setShowWMS4] = useState(initialShowWMS3);
   const [showtoposheet, settoposheet] = useState(initialtoposheet);
   const [wms2Style, setWms2Style] = useState("");
   const mapRef = useRef(null);
 
-  
+  // For a layer toggle popup
+  const [isLayerPopupVisible, setIsLayerPopupVisible] = useState(false);
 
   const toggleStyle = () => {
     setWms2Style((prevStyle) => (prevStyle === "" ? "polygon" : ""));
@@ -283,19 +285,28 @@ const MapComponent = ({
 
   return (
     <MapContainer
-      center={[18.59, 73.84]}
+      center={[18.55, 73.94]}
       zoom={10}
-      style={{ height: "100vh", width: "100%" }}
+      style={{ height: "68vh", width: "100%" }}
       whenCreated={(map) => (mapRef.current = map)}
     >
       {/* Base Map Layer */}
-      {topomap && (
+      {/* {topomap && (
         <TileLayer
           url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
           attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
           zIndex={1}
         />
+      )} */}
+      {topomap && (
+        <TileLayer
+          url="https://mt1.google.com/vt/lyrs=s&x={x}&y={y}&z={z}"
+          attribution='&copy; <a href="https://www.google.com/maps">Google Maps</a>'
+          maxZoom={21}
+          zIndex={1}
+        />
       )}
+
       {showWmsPOINTS && (
         <WMSTileLayer
           key={`Zone_layer_${cqlFilterZone}`}
@@ -307,13 +318,14 @@ const MapComponent = ({
           params={{ CQL_FILTER: cqlFilterZone }}
           opacity={opacityWMS2}
           zIndex={2}
+          maxZoom={5}
         />
       )}
 
       {/* First WMS Layer - Aviation_data */}
       {showWMS1 && (
         <WMSTileLayer
-          url="https://iwmsgis.pmc.gov.in/geoserver/AutoDCR/wms"
+          url="https://iwmsgis.pmc.gov.in/geoserver/MOD/wms"
           layers="Aviation_data"
           transparent={true}
           format="image/png"
@@ -336,8 +348,6 @@ const MapComponent = ({
           zIndex={3}
         />
       )}
-
-      
 
       {/* Third WMS Layer - Ward_Boundary with CQL_FILTER */}
       {showWMS3 && (
@@ -366,92 +376,115 @@ const MapComponent = ({
         />
       )}
 
-      {/* Layer Toggle UI */}
-      {showLayerNames && (
-  <div
-    style={{
-      position: "absolute",
-      top: "10px",
-      right: "10px",
-      zIndex: 1000,
-      background: "white",
-      padding: "10px",
-      borderRadius: "5px",
-      boxShadow: "0 1px 5px rgba(0,0,0,0.4)",
-    }}
-  >
-    <button
-      onClick={() => setIsLayerPanelCollapsed(!isLayerPanelCollapsed)}
-      style={{
-        background: "none",
-        border: "none",
-        cursor: "pointer",
-        fontSize: "16px",
-        fontWeight: "bold",
-      }}
-    >
-      {isLayerPanelCollapsed ? "Show Layers" : "Hide Layers"}
-    </button>
+      {/* {showWMS4 && (
+        <WMSTileLayer
+          key={`Ward_Boundary_${cqlFilterWard}`}
+          url="https://iwmsgis.pmc.gov.in/geoserver/MOD/wms"
+          layers="Aviation_data"
+          transparent={true}
+          format="image/png"
+          opacity={opacityWMS3}
+          zIndex={5}
+        />
+      )} */}
 
-    {!isLayerPanelCollapsed && (
-      <div>
-        <label>
-          <input
-            type="checkbox"
-            checked={showWMS1}
-            onChange={() => setShowWMS1(!showWMS1)}
-          />
-          Aviation_data
-        </label>
-        <br />
-        <label>
-          <input
-            type="checkbox"
-            checked={showWmsPOINTS}
-            onChange={() => setShowWMSPOINTS(!showWmsPOINTS)}
-          />
-          Site Points
-        </label>
-        <br />
-        <label>
-          <input
-            type="checkbox"
-            checked={showWMS2}
-            onChange={() => setShowWMS2(!showWMS2)}
-          />
-          Site_boundary
-        </label>
-        <br />
-        <label>
-          <input
-            type="checkbox"
-            checked={showWMS3}
-            onChange={() => setShowWMS3(!showWMS3)}
-          />
-          Ward_Boundary
-        </label>
-        <br />
-        <label>
-          <input
-            type="checkbox"
-            checked={topomap}
-            onChange={() => settopomap(!topomap)}
-          />
-          OSM Topomap
-        </label>
-        <br />
-        <label>
-          <input
-            type="checkbox"
-            checked={showtoposheet}
-            onChange={() => settoposheet(!showtoposheet)}
-          />
-          Toposheet
-        </label>
-      </div>
-    )}
-  </div>
-)}
+      {/* Layer Toggle UI */}
+      {/* This button stays visible at all times to toggle the popup */}
+      <button
+        onClick={() => setIsLayerPopupVisible(!isLayerPopupVisible)}
+        style={{
+          position: "absolute",
+          top: "10px",
+          right: "10px",
+          zIndex: 1001,
+          background: "white",
+          borderRadius:"2px",
+          cursor: "pointer",
+          fontSize: "25px",
+          // color: "#374151",
+          color: "#2563eb",
+          width:"35px"
+        }}
+      >
+        <i className="bi bi-stack"></i>
+      </button>
+
+      {/* Layer panel popup */}
+      {isLayerPopupVisible && (
+        <div
+          style={{
+            position: "absolute",
+            top: "50px",
+            right: "10px",
+            zIndex: 1000,
+            background: "white",
+            padding: "10px",
+            borderRadius: "5px",
+            boxShadow: "0 1px 5px rgba(0,0,0,0.4)",
+          }}
+        >
+          
+
+          {/* Layer checkboxes */}
+          {!isLayerPanelCollapsed && (
+            <div>
+              <label>
+                <input
+                  type="checkbox"
+                  checked={showWMS1}
+                  onChange={() => setShowWMS1(!showWMS1)}
+                />
+                Aviation_data
+              </label>
+              <br />
+              <label>
+                <input
+                  type="checkbox"
+                  checked={showWmsPOINTS}
+                  onChange={() => setShowWMSPOINTS(!showWmsPOINTS)}
+                />
+                Site Points
+              </label>
+              <br />
+              <label>
+                <input
+                  type="checkbox"
+                  checked={showWMS2}
+                  onChange={() => setShowWMS2(!showWMS2)}
+                />
+                Site_boundary
+              </label>
+              <br />
+              <label>
+                <input
+                  type="checkbox"
+                  checked={showWMS3}
+                  onChange={() => setShowWMS3(!showWMS3)}
+                />
+                Ward_Boundary
+              </label>
+              <br />
+              <label>
+                <input
+                  type="checkbox"
+                  checked={topomap}
+                  onChange={() => settopomap(!topomap)}
+                />
+                OSM Topomap
+              </label>
+              <br />
+              <label>
+                <input
+                  type="checkbox"
+                  checked={showtoposheet}
+                  onChange={() => settoposheet(!showtoposheet)}
+                />
+                Toposheet
+              </label>
+            </div>
+          )}
+        </div>
+      )}
 
       <MapInteractions
         cqlFilterZone={cqlFilterZone}

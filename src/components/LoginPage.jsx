@@ -20,8 +20,8 @@ const LoginPage = () => {
     if (username && password) {
       setLoading(true); // Set loading to true when the login button is clicked
       try {
-        const response = await fetch("http://localhost:5000/admin_login", {
-          // http://localhost:5000/admin_login
+        const response = await fetch("http://127.0.0.1:5000/admin_login", {
+          // http://127.0.0.1:5000/admin_login
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ username, password }),
